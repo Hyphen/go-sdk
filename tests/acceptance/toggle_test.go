@@ -36,11 +36,11 @@ func newToggleClient(t *testing.T) *toggle.Toggle {
 func TestToggleAcceptance(t *testing.T) {
 	admin := testutil.NewToggleAdmin()
 	if !admin.IsConfigured() {
-		t.Skip("Toggle admin not configured (missing HYPHEN_API_KEY, HYPHEN_ORGANIZATION_ID, or HYPHEN_PROJECT_ID)")
+		t.Fatal("Toggle admin not configured (missing HYPHEN_API_KEY, HYPHEN_ORGANIZATION_ID, or HYPHEN_PROJECT_ID)")
 	}
 
 	if os.Getenv("HYPHEN_PUBLIC_API_KEY") == "" {
-		t.Skip("HYPHEN_PUBLIC_API_KEY not set")
+		t.Fatal("HYPHEN_PUBLIC_API_KEY not set")
 	}
 
 	ctx := context.Background()

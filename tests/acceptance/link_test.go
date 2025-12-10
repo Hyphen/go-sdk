@@ -36,13 +36,13 @@ func newLinkClient(t *testing.T) *link.Link {
 
 func TestLinkAcceptance(t *testing.T) {
 	if os.Getenv("HYPHEN_API_KEY") == "" {
-		t.Skip("HYPHEN_API_KEY not set")
+		t.Fatal("HYPHEN_API_KEY not set")
 	}
 	if os.Getenv("HYPHEN_ORGANIZATION_ID") == "" {
-		t.Skip("HYPHEN_ORGANIZATION_ID not set")
+		t.Fatal("HYPHEN_ORGANIZATION_ID not set")
 	}
 	if os.Getenv("HYPHEN_LINK_DOMAIN") == "" {
-		t.Skip("HYPHEN_LINK_DOMAIN not set")
+		t.Fatal("HYPHEN_LINK_DOMAIN not set")
 	}
 
 	ctx := context.Background()

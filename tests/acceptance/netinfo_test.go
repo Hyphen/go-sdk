@@ -31,7 +31,7 @@ func newNetInfoClient(t *testing.T) *netinfo.NetInfo {
 
 func TestNetInfoAcceptance(t *testing.T) {
 	if os.Getenv("HYPHEN_API_KEY") == "" {
-		t.Skip("HYPHEN_API_KEY not set")
+		t.Fatal("HYPHEN_API_KEY not set")
 	}
 
 	ctx := context.Background()
