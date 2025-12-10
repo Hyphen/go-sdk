@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Hyphen/hyphen-go-sdk/internal/client"
+	"github.com/Hyphen/go-sdk/internal/client"
 )
 
 // QRSize represents the size of a QR code

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Hyphen/hyphen-go-sdk/pkg/link"
+	"github.com/Hyphen/go-sdk/pkg/link"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

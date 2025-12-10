@@ -32,7 +32,7 @@ func RunGoCode(t *testing.T, code string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := runCmd(t, tmpDir, "go", "mod", "edit", "-replace", "github.com/Hyphen/hyphen-go-sdk="+sdkPath); err != nil {
+	if err := runCmd(t, tmpDir, "go", "mod", "edit", "-replace", "github.com/Hyphen/go-sdk="+sdkPath); err != nil {
 		return "", err
 	}
 

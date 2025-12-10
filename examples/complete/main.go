@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {

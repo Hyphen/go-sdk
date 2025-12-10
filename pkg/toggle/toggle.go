@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Hyphen/hyphen-go-sdk/internal/client"
+	"github.com/Hyphen/go-sdk/internal/client"
 )
 
 // CustomAttributes represents custom key-value pairs for evaluation context

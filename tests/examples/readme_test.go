@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Hyphen/hyphen-go-sdk/tests/examples/testutil"
+	"github.com/Hyphen/go-sdk/tests/examples/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

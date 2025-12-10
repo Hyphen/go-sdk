@@ -1,7 +1,7 @@
 # Hyphen Go SDK
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/Hyphen/hyphen-go-sdk.svg)](https://pkg.go.dev/github.com/Hyphen/hyphen-go-sdk)
-[![Go Report Card](https://goreportcard.com/badge/github.com/Hyphen/hyphen-go-sdk)](https://goreportcard.com/report/github.com/Hyphen/hyphen-go-sdk)
+[![Go Reference](https://pkg.go.dev/badge/github.com/Hyphen/go-sdk.svg)](https://pkg.go.dev/github.com/Hyphen/go-sdk)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Hyphen/go-sdk)](https://goreportcard.com/report/github.com/Hyphen/go-sdk)
 
 The Hyphen Go SDK is a Go library that allows developers to easily integrate Hyphen's feature flag service [Toggle](https://hyphen.ai/toggle), secret management service [ENV](https://hyphen.ai/env), and geo information service [Net Info](https://hyphen.ai/net-info) into their Go applications.
 
@@ -26,7 +26,7 @@ The Hyphen Go SDK is a Go library that allows developers to easily integrate Hyp
 To install the Hyphen Go SDK, you can use `go get`:
 
 ```bash
-go get github.com/Hyphen/hyphen-go-sdk
+go get github.com/Hyphen/go-sdk
 ```
 
 ## Basic Usage with Hyphen
@@ -41,7 +41,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {
@@ -68,7 +68,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {
@@ -130,7 +130,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {
@@ -235,7 +235,7 @@ Hyphen's secret management service [ENV](https://hyphen.ai/env) allows you to ma
 package main
 
 import (
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {
@@ -274,7 +274,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {
@@ -316,7 +316,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {

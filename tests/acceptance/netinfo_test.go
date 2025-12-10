@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Hyphen/hyphen-go-sdk/pkg/netinfo"
+	"github.com/Hyphen/go-sdk/pkg/netinfo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

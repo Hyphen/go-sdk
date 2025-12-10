@@ -3,10 +3,10 @@
 package hyphen
 
 import (
-	"github.com/Hyphen/hyphen-go-sdk/pkg/env"
-	"github.com/Hyphen/hyphen-go-sdk/pkg/link"
-	"github.com/Hyphen/hyphen-go-sdk/pkg/netinfo"
-	"github.com/Hyphen/hyphen-go-sdk/pkg/toggle"
+	"github.com/Hyphen/go-sdk/pkg/env"
+	"github.com/Hyphen/go-sdk/pkg/link"
+	"github.com/Hyphen/go-sdk/pkg/netinfo"
+	"github.com/Hyphen/go-sdk/pkg/toggle"
 )
 
 // Options contains all configuration options for Hyphen services

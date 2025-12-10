@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Hyphen/hyphen-go-sdk"
+	"github.com/Hyphen/go-sdk"
 )
 
 func main() {

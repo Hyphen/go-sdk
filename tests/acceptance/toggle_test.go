@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Hyphen/hyphen-go-sdk/pkg/toggle"
-	"github.com/Hyphen/hyphen-go-sdk/tests/acceptance/testutil"
+	"github.com/Hyphen/go-sdk/pkg/toggle"
+	"github.com/Hyphen/go-sdk/tests/acceptance/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
