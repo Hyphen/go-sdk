@@ -16,15 +16,13 @@ import (
 func newNetInfoClient(t *testing.T) *netinfo.NetInfo {
 	t.Helper()
 
-	options := []netinfo.Option{
-		netinfo.WithAPIKey(os.Getenv("HYPHEN_API_KEY")),
-	}
+	opts := netinfo.NetInfoOptions{}
 
 	if strings.ToLower(os.Getenv("HYPHEN_DEV")) == "true" {
-		options = append(options, netinfo.WithBaseURI("https://dev.net.info"))
+		opts.BaseURI = "https://dev.net.info"
 	}
 
-	client, err := netinfo.New(options...)
+	client, err := netinfo.New(os.Getenv("HYPHEN_API_KEY"), opts)
 	require.NoError(t, err)
 	return client
 }

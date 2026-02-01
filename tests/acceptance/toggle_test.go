@@ -19,16 +19,17 @@ import (
 func newToggleClient(t *testing.T) *toggle.Toggle {
 	t.Helper()
 
-	options := []toggle.Option{
-		toggle.WithPublicAPIKey(os.Getenv("HYPHEN_PUBLIC_API_KEY")),
-		toggle.WithApplicationID(os.Getenv("HYPHEN_APPLICATION_ID")),
-	}
+	opts := toggle.ToggleOptions{}
 
 	if strings.ToLower(os.Getenv("HYPHEN_DEV")) == "true" {
-		options = append(options, toggle.WithHorizonURLs([]string{"https://dev-horizon.hyphen.ai"}))
+		opts.HorizonURLs = []string{"https://dev-horizon.hyphen.ai"}
 	}
 
-	client, err := toggle.New(options...)
+	client, err := toggle.New(
+		os.Getenv("HYPHEN_PUBLIC_API_KEY"),
+		os.Getenv("HYPHEN_APPLICATION_ID"),
+		opts,
+	)
 	require.NoError(t, err)
 	return client
 }
@@ -47,13 +48,21 @@ func TestToggleAcceptance(t *testing.T) {
 
 	t.Run("GetBoolean_returns_true_when_toggle_default_is_true", func(t *testing.T) {
 		toggleKey := fmt.Sprintf("test-bool-true-%d", time.Now().UnixNano())
+		t.Logf("Creating toggle with key: %s", toggleKey)
 		err := admin.CreateBooleanToggle(ctx, toggleKey, true)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		t.Logf("Toggle created successfully")
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 
+		// Try to get the raw value with error info
+		rawVal, rawErr := client.Get(ctx, toggleKey, false, nil)
+		t.Logf("Raw Get result: value=%v, err=%v", rawVal, rawErr)
+
 		result := client.GetBoolean(ctx, toggleKey, false, nil)
+		t.Logf("GetBoolean result: %v", result)
 
 		assert.True(t, result)
 	})
@@ -62,7 +71,8 @@ func TestToggleAcceptance(t *testing.T) {
 		toggleKey := fmt.Sprintf("test-bool-false-%d", time.Now().UnixNano())
 		err := admin.CreateBooleanToggle(ctx, toggleKey, false)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 
@@ -86,7 +96,8 @@ func TestToggleAcceptance(t *testing.T) {
 		theExpectedValue := "the-configured-string-value"
 		err := admin.CreateStringToggle(ctx, toggleKey, theExpectedValue)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 
@@ -110,7 +121,8 @@ func TestToggleAcceptance(t *testing.T) {
 		theExpectedValue := 42.5
 		err := admin.CreateNumberToggle(ctx, toggleKey, theExpectedValue)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 
@@ -140,7 +152,8 @@ func TestToggleAcceptance(t *testing.T) {
 		}
 		err := admin.CreateBooleanToggleWithTargets(ctx, toggleKey, false, targets)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 
@@ -174,7 +187,8 @@ func TestToggleAcceptance(t *testing.T) {
 		}
 		err := admin.CreateStringToggleWithTargets(ctx, toggleKey, "the-default-feature-value", targets)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 
@@ -208,7 +222,8 @@ func TestToggleAcceptance(t *testing.T) {
 		}
 		err := admin.CreateBooleanToggleWithTargets(ctx, toggleKey, false, targets)
 		require.NoError(t, err)
-		t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
+		// TODO: re-enable when DELETE stops hanging
+		// t.Cleanup(func() { admin.DeleteToggle(ctx, toggleKey) })
 
 		client := newToggleClient(t)
 

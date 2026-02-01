@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/Hyphen/go-sdk/internal/client"
@@ -56,59 +55,12 @@ type toggleEvaluation struct {
 	User             *User            `json:"user,omitempty"`
 }
 
-// Options represents configuration options for the Toggle client
-type Options struct {
-	PublicAPIKey        string
-	ApplicationID       string
-	Environment         string
+// ToggleOptions contains optional configuration for the Toggle client
+type ToggleOptions struct {
+	Environment         string // defaults to "development"
 	DefaultContext      *Context
 	HorizonURLs         []string
 	DefaultTargetingKey string
-}
-
-// Option is a functional option for configuring the Toggle client
-type Option func(*Options)
-
-// WithPublicAPIKey sets the public API key for authentication
-func WithPublicAPIKey(key string) Option {
-	return func(o *Options) {
-		o.PublicAPIKey = key
-	}
-}
-
-// WithApplicationID sets the application ID for toggle evaluation
-func WithApplicationID(id string) Option {
-	return func(o *Options) {
-		o.ApplicationID = id
-	}
-}
-
-// WithEnvironment sets the environment (e.g., "development", "production")
-func WithEnvironment(env string) Option {
-	return func(o *Options) {
-		o.Environment = env
-	}
-}
-
-// WithDefaultContext sets the default evaluation context
-func WithDefaultContext(ctx *Context) Option {
-	return func(o *Options) {
-		o.DefaultContext = ctx
-	}
-}
-
-// WithHorizonURLs sets custom Horizon API URLs
-func WithHorizonURLs(urls []string) Option {
-	return func(o *Options) {
-		o.HorizonURLs = urls
-	}
-}
-
-// WithDefaultTargetingKey sets the default targeting key
-func WithDefaultTargetingKey(key string) Option {
-	return func(o *Options) {
-		o.DefaultTargetingKey = key
-	}
 }
 
 // Toggle is the client for feature flag management
@@ -124,25 +76,8 @@ type Toggle struct {
 	errorHandler        func(error)
 }
 
-// New creates a new Toggle client with functional options
-func New(options ...Option) (*Toggle, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	// Get public API key from options or environment
-	publicAPIKey := opts.PublicAPIKey
-	if publicAPIKey == "" {
-		publicAPIKey = os.Getenv("HYPHEN_PUBLIC_API_KEY")
-	}
-
-	// Get application ID from options or environment
-	applicationID := opts.ApplicationID
-	if applicationID == "" {
-		applicationID = os.Getenv("HYPHEN_APPLICATION_ID")
-	}
-
+// New creates a new Toggle client
+func New(publicAPIKey, applicationID string, opts ToggleOptions) (*Toggle, error) {
 	// Set environment, default to "development"
 	environment := opts.Environment
 	if environment == "" {

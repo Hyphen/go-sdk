@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -124,12 +125,16 @@ func (a *ToggleAdmin) createToggle(ctx context.Context, key, toggleType string, 
 	}
 	defer resp.Body.Close()
 
+	// Read and log response body for debugging
+	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Printf("[DEBUG] CreateToggle response: status=%d, body=%s\n", resp.StatusCode, string(respBody))
+
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(respBody))
 	}
 
-	// Allow time for eventual consistency
-	time.Sleep(500 * time.Millisecond)
+	// Allow time for eventual consistency (sync from api to horizon servers)
+	time.Sleep(10 * time.Second)
 
 	return nil
 }

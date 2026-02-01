@@ -14,11 +14,9 @@ func TestNew(t *testing.T) {
 		theApplicationID := "theApplicationID"
 		theEnvironment := "theEnvironment"
 
-		result, err := New(
-			WithPublicAPIKey(thePublicAPIKey),
-			WithApplicationID(theApplicationID),
-			WithEnvironment(theEnvironment),
-		)
+		result, err := New(thePublicAPIKey, theApplicationID, ToggleOptions{
+			Environment: theEnvironment,
+		})
 
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
@@ -38,10 +36,7 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("uses_development_as_default_environment_when_not_provided", func(t *testing.T) {
-		result, err := New(
-			WithPublicAPIKey("public_dGVzdC1vcmc6c2VjcmV0"),
-			WithApplicationID("anApplicationID"),
-		)
+		result, err := New("public_dGVzdC1vcmc6c2VjcmV0", "anApplicationID", ToggleOptions{})
 
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
@@ -55,10 +50,7 @@ func TestNew(t *testing.T) {
 		thePublicAPIKey := "public_dGVzdC1vcmc6c2VjcmV0"
 		theExpectedOrgID := "test-org"
 
-		result, err := New(
-			WithPublicAPIKey(thePublicAPIKey),
-			WithApplicationID("anApplicationID"),
-		)
+		result, err := New(thePublicAPIKey, "anApplicationID", ToggleOptions{})
 
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
@@ -91,11 +83,9 @@ func TestGetBoolean(t *testing.T) {
 		}))
 		t.Cleanup(func() { server.Close() })
 
-		toggle, err := New(
-			WithPublicAPIKey("public_dGVzdC1vcmc6c2VjcmV0"),
-			WithApplicationID(theApplicationID),
-			WithHorizonURLs([]string{server.URL}),
-		)
+		toggle, err := New("public_dGVzdC1vcmc6c2VjcmV0", theApplicationID, ToggleOptions{
+			HorizonURLs: []string{server.URL},
+		})
 		if err != nil {
 			t.Fatalf("Failed to create toggle client: %v", err)
 		}
@@ -110,11 +100,9 @@ func TestGetBoolean(t *testing.T) {
 	t.Run("returns_the_default_value_when_the_request_fails", func(t *testing.T) {
 		theDefaultValue := false
 
-		toggle, err := New(
-			WithPublicAPIKey("public_dGVzdC1vcmc6c2VjcmV0"),
-			WithApplicationID("anApplicationID"),
-			WithHorizonURLs([]string{"http://invalid-url-that-does-not-exist.local"}),
-		)
+		toggle, err := New("public_dGVzdC1vcmc6c2VjcmV0", "anApplicationID", ToggleOptions{
+			HorizonURLs: []string{"http://invalid-url-that-does-not-exist.local"},
+		})
 		if err != nil {
 			t.Fatalf("Failed to create toggle client: %v", err)
 		}
@@ -149,11 +137,9 @@ func TestGetString(t *testing.T) {
 		}))
 		t.Cleanup(func() { server.Close() })
 
-		toggle, err := New(
-			WithPublicAPIKey("public_dGVzdC1vcmc6c2VjcmV0"),
-			WithApplicationID(theApplicationID),
-			WithHorizonURLs([]string{server.URL}),
-		)
+		toggle, err := New("public_dGVzdC1vcmc6c2VjcmV0", theApplicationID, ToggleOptions{
+			HorizonURLs: []string{server.URL},
+		})
 		if err != nil {
 			t.Fatalf("Failed to create toggle client: %v", err)
 		}

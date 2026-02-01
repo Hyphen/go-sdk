@@ -18,14 +18,14 @@ func main() {
 		log.Printf("Warning: Could not load env files: %v\n", err)
 	}
 
-	// Create a complete Hyphen client with all services using functional options
-	client, err := hyphen.New(
-		hyphen.WithPublicAPIKey("your_public_api_key"),
-		hyphen.WithAPIKey("your_api_key"),
-		hyphen.WithApplicationID("your_application_id"),
-		hyphen.WithEnvironment("production"),
-		hyphen.WithOrganizationID("your_organization_id"),
-	)
+	// Create a complete Hyphen client with all services using options struct
+	client, err := hyphen.New(hyphen.ClientOptions{
+		PublicAPIKey:   "your_public_api_key",
+		APIKey:         "your_api_key",
+		ApplicationID:  "your_application_id",
+		Environment:    "production",
+		OrganizationID: "your_organization_id",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -99,54 +99,44 @@ func InjectDevURIs(code string) string {
 		return code
 	}
 
-	// Inject dev URI for NewNetInfo calls
-	if strings.Contains(code, "hyphen.NewNetInfo(") {
-		code = injectNetInfoDevURI(code)
+	// Inject dev URI for NetInfoOptions
+	if strings.Contains(code, "hyphen.NetInfoOptions{}") {
+		code = strings.ReplaceAll(code, "hyphen.NetInfoOptions{}",
+			`hyphen.NetInfoOptions{BaseURI: "https://dev.net.info"}`)
 	}
 
-	// Inject dev URIs for NewLink calls
-	if strings.Contains(code, "hyphen.NewLink(") {
-		code = injectLinkDevURIs(code)
+	// Inject dev URIs for LinkOptions
+	if strings.Contains(code, "hyphen.LinkOptions{}") {
+		code = strings.ReplaceAll(code, "hyphen.LinkOptions{}",
+			`hyphen.LinkOptions{URIs: []string{"https://dev-api.hyphen.ai/api/organizations/{organizationId}/link/codes/"}}`)
 	}
 
-	// Inject dev URIs for hyphen.New() calls that create NetInfo or Link
-	if strings.Contains(code, "hyphen.New(") {
-		code = injectClientDevURIs(code)
+	// Inject dev URIs for ClientOptions (hyphen.New())
+	if strings.Contains(code, "hyphen.ClientOptions{") {
+		code = injectClientOptionsDevURIs(code)
 	}
 
 	return code
 }
 
-// injectNetInfoDevURI adds WithNetInfoBaseURI for dev environment
-func injectNetInfoDevURI(code string) string {
-	return injectOption(code, "hyphen.NewNetInfo(",
-		`hyphen.WithNetInfoBaseURI("https://dev.net.info")`)
-}
+// injectClientOptionsDevURIs adds dev URIs to hyphen.ClientOptions struct
+func injectClientOptionsDevURIs(code string) string {
+	// Find ClientOptions struct and add dev fields before the closing brace
+	// This is a simplified approach - look for the pattern and inject fields
 
-// injectLinkDevURIs adds WithLinkURIs for dev environment
-func injectLinkDevURIs(code string) string {
-	return injectOption(code, "hyphen.NewLink(",
-		`hyphen.WithLinkURIs([]string{"https://dev-api.hyphen.ai/api/organizations/{organizationId}/link/codes/"})`)
-}
+	// Pattern: hyphen.ClientOptions{...}
+	// We need to add:
+	//   NetInfoBaseURI: "https://dev.net.info",
+	//   LinkURIs: []string{"https://dev-api.hyphen.ai/api/organizations/{organizationId}/link/codes/"},
 
-// injectClientDevURIs adds dev URIs to hyphen.New() calls
-func injectClientDevURIs(code string) string {
-	code = injectOption(code, "hyphen.New(",
-		`hyphen.WithNetInfoBaseURI("https://dev.net.info")`)
-	code = injectOption(code, "hyphen.New(",
-		`hyphen.WithLinkURIs([]string{"https://dev-api.hyphen.ai/api/organizations/{organizationId}/link/codes/"})`)
-	return code
-}
-
-// injectOption finds a constructor call and adds an option before its closing parenthesis
-func injectOption(code, constructor, option string) string {
-	startIdx := strings.Index(code, constructor)
+	// Find where ClientOptions ends (the closing brace before the next statement)
+	startIdx := strings.Index(code, "hyphen.ClientOptions{")
 	if startIdx == -1 {
 		return code
 	}
 
-	// Find the matching closing parenthesis by counting parens
-	parenCount := 0
+	// Find the matching closing brace
+	braceCount := 0
 	inString := false
 	var stringChar rune
 	closeIdx := -1
@@ -154,7 +144,7 @@ func injectOption(code, constructor, option string) string {
 	for i := startIdx; i < len(code); i++ {
 		ch := rune(code[i])
 
-		// Track string literals to avoid counting parens inside strings
+		// Track string literals
 		if !inString && (ch == '"' || ch == '`' || ch == '\'') {
 			inString = true
 			stringChar = ch
@@ -163,11 +153,11 @@ func injectOption(code, constructor, option string) string {
 		}
 
 		if !inString {
-			if ch == '(' {
-				parenCount++
-			} else if ch == ')' {
-				parenCount--
-				if parenCount == 0 {
+			if ch == '{' {
+				braceCount++
+			} else if ch == '}' {
+				braceCount--
+				if braceCount == 0 {
 					closeIdx = i
 					break
 				}
@@ -179,15 +169,23 @@ func injectOption(code, constructor, option string) string {
 		return code
 	}
 
-	// Check if there's already a trailing comma before the closing paren
-	prefix := code[:closeIdx]
-	trimmed := strings.TrimRight(prefix, " \t\n")
-	if strings.HasSuffix(trimmed, ",") {
-		// Already has trailing comma, just add the option
-		return prefix + "\t\t" + option + ",\n\t" + code[closeIdx:]
+	// Check if NetInfoBaseURI is already set
+	optionsContent := code[startIdx:closeIdx]
+	devFields := ""
+
+	if !strings.Contains(optionsContent, "NetInfoBaseURI") {
+		devFields += "\n\t\tNetInfoBaseURI: \"https://dev.net.info\","
 	}
-	// No trailing comma, add one
-	return prefix + ",\n\t\t" + option + ",\n\t" + code[closeIdx:]
+	if !strings.Contains(optionsContent, "LinkURIs") {
+		devFields += "\n\t\tLinkURIs: []string{\"https://dev-api.hyphen.ai/api/organizations/{organizationId}/link/codes/\"},"
+	}
+
+	if devFields == "" {
+		return code
+	}
+
+	// Insert before the closing brace
+	return code[:closeIdx] + devFields + "\n\t" + code[closeIdx:]
 }
 
 // AddOsImport ensures "os" is in the imports if os.Getenv is used

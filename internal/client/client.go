@@ -93,7 +93,9 @@ func (c *Client) do(ctx context.Context, method, url string, body interface{}, h
 	}
 
 	// Set default headers
-	req.Header.Set("Content-Type", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
 	req.Header.Set("Accept", "application/json")
 
 	// Set custom headers
@@ -123,8 +125,7 @@ func (c *Client) do(ctx context.Context, method, url string, body interface{}, h
 // CreateHeaders creates a standard set of headers with optional API key
 func CreateHeaders(apiKey string) map[string]string {
 	headers := map[string]string{
-		"Content-Type": "application/json",
-		"Accept":       "application/json",
+		"Accept": "application/json",
 	}
 	if apiKey != "" {
 		headers["x-api-key"] = apiKey

@@ -9,8 +9,8 @@ import (
 	"github.com/Hyphen/go-sdk/pkg/toggle"
 )
 
-// Options contains all configuration options for Hyphen services
-type Options struct {
+// ClientOptions contains configuration for creating a unified Hyphen client
+type ClientOptions struct {
 	// Common authentication
 	APIKey       string // API key for Link and NetInfo services
 	PublicAPIKey string // Public API key for Toggle service
@@ -30,78 +30,12 @@ type Options struct {
 	LinkURIs       []string // Custom URIs for Link service
 }
 
-// Option is a functional option for configuring Hyphen services
-type Option func(*Options)
-
-// WithAPIKey sets the API key (used by Link and NetInfo services)
-func WithAPIKey(key string) Option {
-	return func(o *Options) {
-		o.APIKey = key
-	}
-}
-
-// WithPublicAPIKey sets the public API key (used by Toggle service)
-func WithPublicAPIKey(key string) Option {
-	return func(o *Options) {
-		o.PublicAPIKey = key
-	}
-}
-
-// WithApplicationID sets the application ID (used by Toggle service)
-func WithApplicationID(id string) Option {
-	return func(o *Options) {
-		o.ApplicationID = id
-	}
-}
-
-// WithEnvironment sets the environment (used by Toggle service)
-func WithEnvironment(env string) Option {
-	return func(o *Options) {
-		o.Environment = env
-	}
-}
-
-// WithOrganizationID sets the organization ID (used by Link service)
-func WithOrganizationID(id string) Option {
-	return func(o *Options) {
-		o.OrganizationID = id
-	}
-}
-
-// WithDefaultContext sets the default context for Toggle evaluations
-func WithDefaultContext(ctx *toggle.Context) Option {
-	return func(o *Options) {
-		o.DefaultContext = ctx
-	}
-}
-
-// WithHorizonURLs sets custom Horizon URLs for the Toggle service
-func WithHorizonURLs(urls []string) Option {
-	return func(o *Options) {
-		o.HorizonURLs = urls
-	}
-}
-
-// WithDefaultTargetingKey sets the default targeting key for Toggle
-func WithDefaultTargetingKey(key string) Option {
-	return func(o *Options) {
-		o.DefaultTargetingKey = key
-	}
-}
-
-// WithNetInfoBaseURI sets the base URI for the NetInfo service
-func WithNetInfoBaseURI(uri string) Option {
-	return func(o *Options) {
-		o.NetInfoBaseURI = uri
-	}
-}
-
-// WithLinkURIs sets custom URIs for the Link service
-func WithLinkURIs(uris []string) Option {
-	return func(o *Options) {
-		o.LinkURIs = uris
-	}
-}
+// Re-export options types for convenience
+type (
+	ToggleOptions  = toggle.ToggleOptions
+	NetInfoOptions = netinfo.NetInfoOptions
+	LinkOptions    = link.LinkOptions
+)
 
 // Re-export main types for convenience
 type (
@@ -135,23 +69,23 @@ type Client struct {
 	Toggle  *toggle.Toggle
 	NetInfo *netinfo.NetInfo
 	Link    *link.Link
-	options *Options
+	options *ClientOptions
 }
 
 // New creates a new Hyphen client with all services configured
-func New(options ...Option) (*Client, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
+func New(opts ClientOptions) (*Client, error) {
 	client := &Client{
-		options: opts,
+		options: &opts,
 	}
 
 	// Initialize Toggle service if public API key provided
-	if opts.PublicAPIKey != "" {
-		t, err := NewToggle(options...)
+	if opts.PublicAPIKey != "" && opts.ApplicationID != "" {
+		t, err := NewToggle(opts.PublicAPIKey, opts.ApplicationID, ToggleOptions{
+			Environment:         opts.Environment,
+			DefaultContext:      opts.DefaultContext,
+			HorizonURLs:         opts.HorizonURLs,
+			DefaultTargetingKey: opts.DefaultTargetingKey,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -160,15 +94,19 @@ func New(options ...Option) (*Client, error) {
 
 	// Initialize NetInfo service if API key provided
 	if opts.APIKey != "" {
-		n, err := NewNetInfo(options...)
+		n, err := NewNetInfo(opts.APIKey, NetInfoOptions{
+			BaseURI: opts.NetInfoBaseURI,
+		})
 		if err == nil {
 			client.NetInfo = n
 		}
 	}
 
-	// Initialize Link service if API key provided
-	if opts.APIKey != "" {
-		l, err := NewLink(options...)
+	// Initialize Link service if API key and organization ID provided
+	if opts.APIKey != "" && opts.OrganizationID != "" {
+		l, err := NewLink(opts.APIKey, opts.OrganizationID, LinkOptions{
+			URIs: opts.LinkURIs,
+		})
 		if err == nil {
 			client.Link = l
 		}
@@ -178,75 +116,18 @@ func New(options ...Option) (*Client, error) {
 }
 
 // NewToggle creates a new Toggle client
-func NewToggle(options ...Option) (*toggle.Toggle, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	toggleOpts := []toggle.Option{}
-
-	if opts.PublicAPIKey != "" {
-		toggleOpts = append(toggleOpts, toggle.WithPublicAPIKey(opts.PublicAPIKey))
-	}
-	if opts.ApplicationID != "" {
-		toggleOpts = append(toggleOpts, toggle.WithApplicationID(opts.ApplicationID))
-	}
-	if opts.Environment != "" {
-		toggleOpts = append(toggleOpts, toggle.WithEnvironment(opts.Environment))
-	}
-	if opts.DefaultContext != nil {
-		toggleOpts = append(toggleOpts, toggle.WithDefaultContext(opts.DefaultContext))
-	}
-	if len(opts.HorizonURLs) > 0 {
-		toggleOpts = append(toggleOpts, toggle.WithHorizonURLs(opts.HorizonURLs))
-	}
-	if opts.DefaultTargetingKey != "" {
-		toggleOpts = append(toggleOpts, toggle.WithDefaultTargetingKey(opts.DefaultTargetingKey))
-	}
-
-	return toggle.New(toggleOpts...)
+func NewToggle(publicAPIKey, applicationID string, opts ToggleOptions) (*toggle.Toggle, error) {
+	return toggle.New(publicAPIKey, applicationID, opts)
 }
 
 // NewNetInfo creates a new NetInfo client
-func NewNetInfo(options ...Option) (*netinfo.NetInfo, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	netinfoOpts := []netinfo.Option{}
-
-	if opts.APIKey != "" {
-		netinfoOpts = append(netinfoOpts, netinfo.WithAPIKey(opts.APIKey))
-	}
-	if opts.NetInfoBaseURI != "" {
-		netinfoOpts = append(netinfoOpts, netinfo.WithBaseURI(opts.NetInfoBaseURI))
-	}
-
-	return netinfo.New(netinfoOpts...)
+func NewNetInfo(apiKey string, opts NetInfoOptions) (*netinfo.NetInfo, error) {
+	return netinfo.New(apiKey, opts)
 }
 
 // NewLink creates a new Link client
-func NewLink(options ...Option) (*link.Link, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	linkOpts := []link.Option{}
-
-	if opts.APIKey != "" {
-		linkOpts = append(linkOpts, link.WithAPIKey(opts.APIKey))
-	}
-	if opts.OrganizationID != "" {
-		linkOpts = append(linkOpts, link.WithOrganizationID(opts.OrganizationID))
-	}
-	if len(opts.LinkURIs) > 0 {
-		linkOpts = append(linkOpts, link.WithURIs(opts.LinkURIs))
-	}
-
-	return link.New(linkOpts...)
+func NewLink(apiKey, organizationID string, opts LinkOptions) (*link.Link, error) {
+	return link.New(apiKey, organizationID, opts)
 }
 
 // LoadEnv loads environment variables from .env files

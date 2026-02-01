@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -111,35 +110,9 @@ type GetCodeStatsResponse struct {
 	Locations []any       `json:"locations"`
 }
 
-// Options represents configuration options for the Link client
-type Options struct {
-	URIs           []string
-	OrganizationID string
-	APIKey         string
-}
-
-// Option is a functional option for configuring the Link client
-type Option func(*Options)
-
-// WithAPIKey sets the API key for authentication
-func WithAPIKey(key string) Option {
-	return func(o *Options) {
-		o.APIKey = key
-	}
-}
-
-// WithOrganizationID sets the organization ID
-func WithOrganizationID(id string) Option {
-	return func(o *Options) {
-		o.OrganizationID = id
-	}
-}
-
-// WithURIs sets the base URIs for the Link service
-func WithURIs(uris []string) Option {
-	return func(o *Options) {
-		o.URIs = uris
-	}
+// LinkOptions contains optional configuration for the Link client
+type LinkOptions struct {
+	URIs []string // defaults to production URIs
 }
 
 // Link is the client for URL shortening services
@@ -155,30 +128,13 @@ var defaultLinkURIs = []string{
 	"https://api.hyphen.ai/api/organizations/{organizationId}/link/codes/",
 }
 
-// New creates a new Link client with functional options
-func New(options ...Option) (*Link, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	// Get API key from options or environment
-	apiKey := opts.APIKey
-	if apiKey == "" {
-		apiKey = os.Getenv("HYPHEN_API_KEY")
-	}
-
-	if apiKey != "" && strings.HasPrefix(apiKey, "public_") {
+// New creates a new Link client
+func New(apiKey, organizationID string, opts LinkOptions) (*Link, error) {
+	if strings.HasPrefix(apiKey, "public_") {
 		return nil, fmt.Errorf("API key cannot start with \"public_\"")
 	}
 
-	// Get organization ID from options or environment
-	organizationID := opts.OrganizationID
-	if organizationID == "" {
-		organizationID = os.Getenv("HYPHEN_ORGANIZATION_ID")
-	}
-
-	// Set URIs
+	// Set URIs, default to production URIs
 	uris := opts.URIs
 	if len(uris) == 0 {
 		uris = defaultLinkURIs

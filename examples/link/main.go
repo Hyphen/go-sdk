@@ -10,11 +10,8 @@ import (
 )
 
 func main() {
-	// Create a Link client using functional options
-	link, err := hyphen.NewLink(
-		hyphen.WithAPIKey("your_api_key"),
-		hyphen.WithOrganizationID("your_organization_id"),
-	)
+	// Create a Link client with required args and options struct
+	link, err := hyphen.NewLink("your_api_key", "your_organization_id", hyphen.LinkOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}

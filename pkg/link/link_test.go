@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"os"
 	"testing"
 	"time"
 
@@ -58,11 +57,9 @@ func (f *FakeHTTPClient) Delete(ctx context.Context, url string, headers map[str
 
 func TestNew(t *testing.T) {
 	t.Run("creates_a_new_link_client_with_provided_options", func(t *testing.T) {
-		link, err := New(
-			WithAPIKey("theApiKey"),
-			WithOrganizationID("theOrgId"),
-			WithURIs([]string{"https://test.com"}),
-		)
+		link, err := New("theApiKey", "theOrgId", LinkOptions{
+			URIs: []string{"https://test.com"},
+		})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, link)
@@ -71,46 +68,32 @@ func TestNew(t *testing.T) {
 		assert.Equal(t, []string{"https://test.com"}, link.uris)
 	})
 
-	t.Run("uses_environment_variables_when_options_are_not_provided", func(t *testing.T) {
-		os.Setenv("HYPHEN_API_KEY", "theEnvApiKey")
-		os.Setenv("HYPHEN_ORGANIZATION_ID", "theEnvOrgId")
-		t.Cleanup(func() {
-			os.Unsetenv("HYPHEN_API_KEY")
-			os.Unsetenv("HYPHEN_ORGANIZATION_ID")
-		})
-
-		link, err := New()
-
-		assert.NoError(t, err)
-		assert.Equal(t, "theEnvApiKey", link.apiKey)
-		assert.Equal(t, "theEnvOrgId", link.organizationID)
-	})
-
 	t.Run("uses_default_uris_when_not_provided", func(t *testing.T) {
-		link, err := New()
+		link, err := New("anApiKey", "anOrgId", LinkOptions{})
 
 		assert.NoError(t, err)
 		assert.Equal(t, defaultLinkURIs, link.uris)
 	})
 
 	t.Run("returns_an_error_when_api_key_starts_with_public_", func(t *testing.T) {
-		link, err := New(WithAPIKey("public_invalid"))
+		link, err := New("public_invalid", "anOrgId", LinkOptions{})
 
 		assert.Nil(t, link)
 		assert.EqualError(t, err, "API key cannot start with \"public_\"")
 	})
 
-	t.Run("creates_client_when_no_options_provided", func(t *testing.T) {
-		link, err := New()
+	t.Run("creates_client_with_empty_api_key", func(t *testing.T) {
+		link, err := New("", "anOrgId", LinkOptions{})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, link)
+		assert.Equal(t, "", link.apiKey)
 	})
 }
 
 func TestSetErrorHandler(t *testing.T) {
 	t.Run("sets_the_error_handler", func(t *testing.T) {
-		link, _ := New()
+		link, _ := New("anApiKey", "anOrgId", LinkOptions{})
 		handlerCalled := false
 		handler := func(err error) {
 			handlerCalled = true

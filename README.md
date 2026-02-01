@@ -13,7 +13,6 @@ The Hyphen Go SDK is a Go library that allows developers to easily integrate Hyp
   - [Toggle Options](#toggle-options)
   - [Toggle API](#toggle-api)
   - [Toggle Error Handling](#toggle-error-handling)
-  - [Toggle Environment Variables](#toggle-environment-variables)
   - [Toggle Self-Hosted](#toggle-self-hosted)
 - [ENV - Secret Management Service](#env---secret-management-service)
 - [Net Info - Geo Information Service](#net-info---geo-information-service)
@@ -31,7 +30,7 @@ go get github.com/Hyphen/go-sdk
 
 ## Basic Usage with Hyphen
 
-There are many ways to use the Hyphen Go SDK. To get started, you can create an instance of the `Client` using functional options:
+There are many ways to use the Hyphen Go SDK. To get started, you can create an instance of the `Client` using `ClientOptions`:
 
 ```go
 package main
@@ -45,10 +44,10 @@ import (
 )
 
 func main() {
-	client, err := hyphen.New(
-		hyphen.WithPublicAPIKey("your_public_api_key"),
-		hyphen.WithApplicationID("your_application_id"),
-	)
+	client, err := hyphen.New(hyphen.ClientOptions{
+		PublicAPIKey:  "your_public_api_key",
+		ApplicationID: "your_application_id",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,11 +88,11 @@ func main() {
 		},
 	}
 
-	client, err := hyphen.New(
-		hyphen.WithPublicAPIKey("your_public_api_key"),
-		hyphen.WithApplicationID("your_application_id"),
-		hyphen.WithDefaultContext(ctx),
-	)
+	client, err := hyphen.New(hyphen.ClientOptions{
+		PublicAPIKey:   "your_public_api_key",
+		ApplicationID:  "your_application_id",
+		DefaultContext: ctx,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,12 +110,10 @@ func main() {
 
 | Option | Description |
 |--------|-------------|
-| `WithPublicAPIKey(key)` | The public API key for your Hyphen project. Must start with "public_". |
-| `WithApplicationID(id)` | The application ID for your Hyphen project. |
-| `WithEnvironment(env)` | The environment for your Hyphen project (e.g., "production"). Defaults to "development". |
-| `WithDefaultContext(ctx)` | The default context to use when one is not passed to getter methods. |
-| `WithHorizonURLs(urls)` | Array of Horizon endpoint URLs for load balancing and failover. |
-| `WithDefaultTargetingKey(key)` | Default targeting key to use if one cannot be derived from context. |
+| `Environment` | The environment for your Hyphen project (e.g., "production"). Defaults to "development". |
+| `DefaultContext` | The default context to use when one is not passed to getter methods. |
+| `HorizonURLs` | Array of Horizon endpoint URLs for load balancing and failover. |
+| `DefaultTargetingKey` | Default targeting key to use if one cannot be derived from context. |
 
 ### Toggle API
 
@@ -134,11 +131,9 @@ import (
 )
 
 func main() {
-	toggle, err := hyphen.NewToggle(
-		hyphen.WithPublicAPIKey("your_public_api_key"),
-		hyphen.WithApplicationID("your_application_id"),
-		hyphen.WithEnvironment("production"),
-	)
+	toggle, err := hyphen.NewToggle("your_public_api_key", "your_application_id", hyphen.ToggleOptions{
+		Environment: "production",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -185,10 +180,7 @@ result := toggle.GetBoolean(ctx, "feature-flag", false, overrideContext)
 The SDK provides error handling through a callback mechanism:
 
 ```go
-toggle, err := hyphen.NewToggle(
-	hyphen.WithPublicAPIKey("your_public_api_key"),
-	hyphen.WithApplicationID("your_application_id"),
-)
+toggle, err := hyphen.NewToggle("your_public_api_key", "your_application_id", hyphen.ToggleOptions{})
 if err != nil {
 	panic(err)
 }
@@ -202,27 +194,14 @@ toggle.SetErrorHandler(func(err error) {
 result := toggle.GetBoolean(ctx, "feature-flag", false, nil)
 ```
 
-### Toggle Environment Variables
-
-You can use environment variables to set the `PublicAPIKey` and `ApplicationID`:
-
-```bash
-export HYPHEN_PUBLIC_API_KEY=your_public_api_key
-export HYPHEN_APPLICATION_ID=your_application_id
-```
-
-The SDK will automatically check for these environment variables during initialization.
-
 ### Toggle Self-Hosted
 
-If you are using a self-hosted version of Hyphen, you can use the `WithHorizonURLs` option:
+If you are using a self-hosted version of Hyphen, you can use the `HorizonURLs` option:
 
 ```go
-toggle, err := hyphen.NewToggle(
-	hyphen.WithPublicAPIKey("your_public_api_key"),
-	hyphen.WithApplicationID("your_application_id"),
-	hyphen.WithHorizonURLs([]string{"https://your-self-hosted-horizon-url"}),
-)
+toggle, err := hyphen.NewToggle("your_public_api_key", "your_application_id", hyphen.ToggleOptions{
+	HorizonURLs: []string{"https://your-self-hosted-horizon-url"},
+})
 ```
 
 ## ENV - Secret Management Service
@@ -278,9 +257,7 @@ import (
 )
 
 func main() {
-	netInfo, err := hyphen.NewNetInfo(
-		hyphen.WithAPIKey("your_api_key"),
-	)
+	netInfo, err := hyphen.NewNetInfo("your_api_key", hyphen.NetInfoOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -320,10 +297,7 @@ import (
 )
 
 func main() {
-	link, err := hyphen.NewLink(
-		hyphen.WithAPIKey("your_api_key"),
-		hyphen.WithOrganizationID("your_organization_id"),
-	)
+	link, err := hyphen.NewLink("your_api_key", "your_organization_id", hyphen.LinkOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -371,22 +345,59 @@ qrCodes, err := link.GetQRCodes(ctx, "code_1234567890", 1, 10)
 err = link.DeleteQRCode(ctx, "code_1234567890", "qr_1234567890")
 ```
 
-## All Available Options
+## Function Signatures
 
-The SDK uses a unified functional options pattern. Here are all available options:
+### Toggle
 
-| Option | Used By | Description |
-|--------|---------|-------------|
-| `WithAPIKey(key)` | Link, NetInfo | API key for authentication |
-| `WithPublicAPIKey(key)` | Toggle | Public API key (must start with "public_") |
-| `WithApplicationID(id)` | Toggle | Application ID |
-| `WithEnvironment(env)` | Toggle | Environment name (defaults to "development") |
-| `WithOrganizationID(id)` | Link | Organization ID |
-| `WithDefaultContext(ctx)` | Toggle | Default evaluation context |
-| `WithHorizonURLs(urls)` | Toggle | Custom Horizon endpoint URLs |
-| `WithDefaultTargetingKey(key)` | Toggle | Default targeting key |
-| `WithNetInfoBaseURI(uri)` | NetInfo | Custom base URI |
-| `WithLinkURIs(uris)` | Link | Custom Link service URIs |
+```go
+// NewToggle creates a new Toggle client
+// publicAPIKey: Public API key (must start with "public_")
+// applicationID: Application ID for your Hyphen project
+// opts: Optional configuration (Environment, DefaultContext, HorizonURLs, DefaultTargetingKey)
+hyphen.NewToggle(publicAPIKey, applicationID string, opts ToggleOptions) (*Toggle, error)
+```
+
+### NetInfo
+
+```go
+// NewNetInfo creates a new NetInfo client
+// apiKey: API key for authentication (must NOT start with "public_")
+// opts: Optional configuration (BaseURI)
+hyphen.NewNetInfo(apiKey string, opts NetInfoOptions) (*NetInfo, error)
+```
+
+### Link
+
+```go
+// NewLink creates a new Link client
+// apiKey: API key for authentication
+// organizationID: Organization ID for your Hyphen project
+// opts: Optional configuration (URIs)
+hyphen.NewLink(apiKey, organizationID string, opts LinkOptions) (*Link, error)
+```
+
+### Unified Client
+
+```go
+// New creates a unified client with all services
+// opts: All configuration in ClientOptions struct
+hyphen.New(opts ClientOptions) (*Client, error)
+```
+
+## ClientOptions Reference
+
+| Field | Used By | Description |
+|-------|---------|-------------|
+| `APIKey` | Link, NetInfo | API key for authentication |
+| `PublicAPIKey` | Toggle | Public API key (must start with "public_") |
+| `ApplicationID` | Toggle | Application ID |
+| `Environment` | Toggle | Environment name (defaults to "development") |
+| `OrganizationID` | Link | Organization ID |
+| `DefaultContext` | Toggle | Default evaluation context |
+| `HorizonURLs` | Toggle | Custom Horizon endpoint URLs |
+| `DefaultTargetingKey` | Toggle | Default targeting key |
+| `NetInfoBaseURI` | NetInfo | Custom base URI |
+| `LinkURIs` | Link | Custom Link service URIs |
 
 ## Contributing
 

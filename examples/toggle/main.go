@@ -9,12 +9,10 @@ import (
 )
 
 func main() {
-	// Create a Toggle client using functional options
-	toggle, err := hyphen.NewToggle(
-		hyphen.WithPublicAPIKey("your_public_api_key"),
-		hyphen.WithApplicationID("your_application_id"),
-		hyphen.WithEnvironment("production"),
-	)
+	// Create a Toggle client with required args and options struct
+	toggle, err := hyphen.NewToggle("your_public_api_key", "your_application_id", hyphen.ToggleOptions{
+		Environment: "production",
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

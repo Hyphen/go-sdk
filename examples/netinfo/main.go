@@ -9,10 +9,8 @@ import (
 )
 
 func main() {
-	// Create a NetInfo client using functional options
-	netInfo, err := hyphen.NewNetInfo(
-		hyphen.WithAPIKey("your_api_key"),
-	)
+	// Create a NetInfo client with required API key and options struct
+	netInfo, err := hyphen.NewNetInfo("your_api_key", hyphen.NetInfoOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}

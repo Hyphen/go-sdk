@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/Hyphen/go-sdk/internal/client"
@@ -42,27 +41,9 @@ type IPInfosResponse struct {
 	Data []interface{} `json:"data"`
 }
 
-// Options represents configuration options for the NetInfo client
-type Options struct {
-	APIKey  string
-	BaseURI string
-}
-
-// Option is a functional option for configuring the NetInfo client
-type Option func(*Options)
-
-// WithAPIKey sets the API key for authentication
-func WithAPIKey(key string) Option {
-	return func(o *Options) {
-		o.APIKey = key
-	}
-}
-
-// WithBaseURI sets the base URI for the NetInfo service
-func WithBaseURI(uri string) Option {
-	return func(o *Options) {
-		o.BaseURI = uri
-	}
+// NetInfoOptions contains optional configuration for the NetInfo client
+type NetInfoOptions struct {
+	BaseURI string // defaults to "https://net.info"
 }
 
 // NetInfo is the client for geo information services
@@ -73,23 +54,8 @@ type NetInfo struct {
 	errorHandler func(error)
 }
 
-// New creates a new NetInfo client with functional options
-func New(options ...Option) (*NetInfo, error) {
-	opts := &Options{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	// Get API key from options or environment
-	apiKey := opts.APIKey
-	if apiKey == "" {
-		apiKey = os.Getenv("HYPHEN_API_KEY")
-	}
-
-	if apiKey == "" {
-		return nil, fmt.Errorf("API key is required. Please provide it via options or set the HYPHEN_API_KEY environment variable")
-	}
-
+// New creates a new NetInfo client
+func New(apiKey string, opts NetInfoOptions) (*NetInfo, error) {
 	if strings.HasPrefix(apiKey, "public_") {
 		return nil, fmt.Errorf("the provided API key is a public API key. Please provide a valid non-public API key for authentication")
 	}
